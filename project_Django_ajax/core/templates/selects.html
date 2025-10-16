@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <title>AJAX con Estados y Municipios</title>
+</head>
+<body>
+    <h1>Carga Dinámica con AJAX (Fetch API)</h1>
+
+    <label for="id_estado">Selecciona un Estado:</label>
+    <select id="id_estado">
+        <option value="">--- Selecciona ---</option>
+        {% for estado in estados %}
+            <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+        {% endfor %}
+    </select>
+
+    <br><br>
+
+    <label for="id_municipio">Selecciona un Municipio:</label>
+    <select id="id_municipio" disabled>
+        <option value="">--- Selecciona un estado primero ---</option>
+    </select>
+
+    <script>
+        const estadoSelect = document.getElementById('id_estado');
+        const municipioSelect = document.getElementById('id_municipio');
+
+        // Función para limpiar y habilitar el select de municipios
+        function resetMunicipios(loading = false) {
+            municipioSelect.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            
+            if (loading) {
+                defaultOption.text = 'Cargando municipios...';
+                municipioSelect.disabled = true;
+            } else {
+                defaultOption.text = '--- Selecciona un estado primero ---';
+                municipioSelect.disabled = true;
+            }
+            municipioSelect.appendChild(defaultOption);
+        }
+
+        // Lógica AJAX usando Fetch API
+        estadoSelect.addEventListener('change', (event) => {
+            const estadoId = event.target.value;
+            
+            resetMunicipios(true); // Mostrar mensaje de carga
+
+            if (!estadoId) {
+                resetMunicipios(); // Si no hay estado seleccionado, solo resetear
+                return;
+            }
+
+            // Construir la URL del endpoint de Django
+            const url = `/api/municipios/${estadoId}/`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error HTTP: ${response.status}`);
+                    }
+                    return response.json(); // Parsea la respuesta JSON de Django
+                })
+                .then(data => {
+                    // Limpiar y habilitar el select de municipios
+                    municipioSelect.innerHTML = '';
+                    municipioSelect.disabled = false;
+                    
+                    if (data.municipios && data.municipios.length > 0) {
+                        // 1. Agregar opción por defecto
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = "";
+                        defaultOption.text = "--- Selecciona un municipio ---";
+                        municipioSelect.appendChild(defaultOption);
+
+                        // 2. Llenar con los datos recibidos de Django
+                        data.municipios.forEach(municipio => {
+                            const option = document.createElement('option');
+                            option.value = municipio;
+                            option.text = municipio;
+                            municipioSelect.appendChild(option);
+                        });
+                    } else {
+                        // Si no hay municipios
+                        resetMunicipios(false);
+                        municipioSelect.querySelector('option').text = 'No hay municipios disponibles.';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al obtener municipios:', error);
+                    alert('Hubo un error al cargar los municipios. Revisa la consola.');
+                    resetMunicipios();
+                });
+        });
+    </script>
+</body>
+</html>

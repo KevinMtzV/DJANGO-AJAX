@@ -1,25 +1,61 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <title>AJAX con Estados y Municipios</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carga Dinámica con AJAX y Django 🇲🇽</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <style>
+        /* Estilos personalizados */
+        body {
+            background-color: #596066; /* Fondo gris claro */
+        }
+        .container {
+            margin-top: 50px;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 <body>
-    <h1>Carga Dinámica con AJAX (Fetch API)</h1>
 
-    <label for="id_estado">Selecciona un Estado:</label>
-    <select id="id_estado">
-        <option value="">--- Selecciona ---</option>
-        {% for estado in estados %}
-            <option value="{{ estado.id }}">{{ estado.nombre }}</option>
-        {% endfor %}
-    </select>
+    <div class="container bg-white">
+        <h1 class="text-center mb-4 text-primary">
+            Carga de Municipios con AJAX
+        </h1>
+        <p class="text-center text-muted mb-5">
+            Selecciona un estado para cargar sus municipios de forma asíncrona (sin recargar la página).
+        </p>
 
-    <br><br>
+        <div class="row g-3">
+            
+            <div class="col-md-6">
+                <label for="id_estado" class="form-label fw-bold">1. Selecciona un Estado:</label>
+                <select id="id_estado" class="form-select form-select-lg">
+                    <option value="">--- Selecciona un Estado ---</option>
+                    {% for estado in estados %}
+                        <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-md-6">
+                <label for="id_municipio" class="form-label fw-bold">2. Selecciona un Municipio:</label>
+                <select id="id_municipio" class="form-select form-select-lg" disabled>
+                    <option value="">--- Selecciona un estado primero ---</option>
+                </select>
+            </div>
 
-    <label for="id_municipio">Selecciona un Municipio:</label>
-    <select id="id_municipio" disabled>
-        <option value="">--- Selecciona un estado primero ---</option>
-    </select>
+            <div id="feedback-message" class="col-12 mt-4">
+                </div>
+            
+        </div>
+        </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
         const estadoSelect = document.getElementById('id_estado');
